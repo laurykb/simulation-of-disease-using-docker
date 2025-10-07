@@ -1,0 +1,13 @@
+apiVersion: 1
+
+providers:
+  - name: "MediComTel"
+    orgId: 1
+    folder: ""
+    type: file
+    disableDeletion: false
+    allowUiUpdates: true
+    updateIntervalSeconds: 5
+    options:
+      path: /var/lib/grafana/dashboards
+      # Grafana rechargera automatiquement les JSON placés dans ce dossier

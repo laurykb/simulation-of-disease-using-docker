@@ -1,0 +1,97 @@
+{
+  "id": null,
+  "uid": "medicomtel",
+  "title": "MediComTel - Vue d'ensemble (auto)",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 5,
+  "refresh": "5s",
+  "time": { "from": "now-1h", "to": "now" },
+
+  "templating": {
+    "list": [
+      {
+        "type": "query",
+        "name": "patient_id",
+        "hide": 0,
+        "refresh": 1,
+        "datasource": { "type": "grafana-postgresql-datasource", "uid": "pg_main" },
+        "query": "SELECT id AS value, (id || ' - ' || nom) AS text FROM patients ORDER BY id;",
+        "includeAll": true,
+        "allValue": "-1",
+        "multi": false,
+        "current": { "selected": true, "text": "ALL", "value": "-1" }
+      }
+    ]
+  },
+
+  "annotations": { "list": [] },
+
+  "panels": [
+    {
+      "type": "table",
+      "title": "Nature des alertes (horodaté)",
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 8 },
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "pg_main" },
+      "options": { "showHeader": true },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  a.ts AS \"time\",\n  p.nom AS \"patient\",\n  a.type AS \"type\",\n  a.severity AS \"niveau\",\n  a.message AS \"message\"\nFROM alertes a\nJOIN patients p ON p.id = a.patient_id\nWHERE ($patient_id = -1 OR p.id = $patient_id)\n  AND $__timeFilter(a.ts)\nORDER BY a.ts DESC\nLIMIT 200;"
+        }
+      ]
+    },
+
+    {
+      "type": "timeseries",
+      "title": "Fréquence cardiaque (patient sélectionné)",
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "pg_main" },
+      "fieldConfig": { "defaults": {}, "overrides": [] },
+      "options": { "legend": { "showLegend": true } },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  EXTRACT(EPOCH FROM t.ts) * 1000 AS \"time\",\n  t.hr AS \"value\",\n  p.nom AS \"metric\"\nFROM telemetrie t\nJOIN patients p ON p.id = t.patient_id\nWHERE ($patient_id = -1 OR p.id = $patient_id)\n  AND $__timeFilter(t.ts)\nORDER BY t.ts ASC;"
+        }
+      ]
+    },
+
+    {
+      "type": "timeseries",
+      "title": "Température (patient sélectionné)",
+      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "pg_main" },
+      "fieldConfig": { "defaults": {}, "overrides": [] },
+      "options": { "legend": { "showLegend": true } },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  EXTRACT(EPOCH FROM t.ts) * 1000 AS \"time\",\n  t.temp AS \"value\",\n  p.nom AS \"metric\"\nFROM telemetrie t\nJOIN patients p ON p.id = t.patient_id\nWHERE ($patient_id = -1 OR p.id = $patient_id)\n  AND $__timeFilter(t.ts)\nORDER BY t.ts ASC;"
+        }
+      ]
+    },
+
+    {
+      "type": "table",
+      "title": "Patients (créés via CLI)",
+      "gridPos": { "x": 0, "y": 24, "w": 24, "h": 8 },
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "pg_main" },
+      "options": { "showHeader": true },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT \n  id AS \"ID patient\",\n  nom AS \"Nom\",\n  prenom AS \"Prénom\",\n  dob AS \"Date de naissance\",\n  statut AS \"Statut\",\n  created_at AS \"Date de création\"\nFROM patients\nWHERE statut = 'cli'\nORDER BY created_at DESC;"
+        }
+      ]
+    }
+  ]
+}

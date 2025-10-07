@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
+
+# Docker volumes & logs
+db_data/
+grafana_data/
+*/logs/
+*.log
+
+# Environnements
+.env
+.env.*
+
+# VSCode / IDE
+.vscode/
+.idea/
+
+# Autres fichiers locaux
+*.pid

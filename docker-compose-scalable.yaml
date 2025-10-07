@@ -1,0 +1,79 @@
+services:
+
+  db:
+    image: postgres:14
+    container_name: medicomtel_db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: base_test
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - backend
+
+  # NGINX pour load balancing
+  nginx:
+    image: nginx:alpine
+    container_name: medicomtel_nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api
+    networks:
+      - frontend
+      - backend
+
+  simulator:  
+    build: ./simulator
+    container_name: medicomtel_simulator
+    depends_on:
+      - nginx
+    networks:
+      - backend
+
+  api:  
+    build: ./API
+    depends_on:
+      - db
+    networks:
+      - backend
+      - frontend
+
+  grafana: 
+    image: grafana/grafana:latest
+    container_name: medicomtel_dashboard
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - db
+    ports:
+      - "8081:3000" 
+    networks:
+      - frontend
+      - backend
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+  analyzer:
+    build: ./analyzer
+    container_name: medicomtel_analyzer
+    depends_on:
+      - db
+      - nginx
+    networks:
+      - backend
+    restart: unless-stopped     
+
+
+volumes:
+  db_data:
+  grafana_data:
+
+networks:
+  frontend:
+  backend:
