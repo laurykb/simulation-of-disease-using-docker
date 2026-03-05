@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-echo "▶️  Démarrage DB + API…"
+echo " Démarrage DB + API…"
 # On scale l'API : on lance 3 conteneurs issus de la même image
 docker compose -p medicomtel --profile core up -d --scale api=3 db api
 
