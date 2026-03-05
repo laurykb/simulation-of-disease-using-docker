@@ -23,21 +23,18 @@ Dashboard connecté à Postgres pour :
 
 afficher l’évolution du rythme cardiaque des patients
 visualiser les dossiers "pending" des clients
-*a faire* Afficher les alertes depuis la database
+Afficher les alertes depuis la database
 
 
 Simulator (simulator):
 Script Python qui génère des données fictives de télémétrie (hr + temp) et les envoie périodiquement à l’API.
 
-*a faire*  Analyseur : 
-Analyse la table "télémétrie" de la database pour détecter des alertes et les ajouter a la table "alertes" via l'api.
+Analyseur : Analyse la table "télémétrie" de la database pour détecter des alertes et les ajouter a la table "alertes" via l'api.
 
 
 **Démarage**
 
 *sudo docker compose up -d* depuis le dossier Medicomtel ajouter *--build* pour build l'image la premiere fois
-
-*a faire* ajouter des health check sur les container ? et la redondance/scalabilité ?
 
 Le volume de la database est persistant, il faut penser à le supprimer pour reinitialiser la base si besoin.
 
@@ -79,14 +76,3 @@ A la premiere connexion ajouter une datasource : Postgres ; db:4321 ; db_test ; 
 
 et importer les dashboards dans le sous dossier "grafana" avec la fonction d'import dans la categorie dashboard.
 
-
-**Scadabilité**
-
-Utiliser le docker-compose-scalable.yaml fourni
-docker compose -f docker-compose-scalable.yaml up -d
-
-Exemple: Scaler l'API
-docker compose -f docker-compose-scalable.yaml up --scale api=5 -d
-
-Nginx répartit automatiquement la charge
-curl http://localhost:8080
