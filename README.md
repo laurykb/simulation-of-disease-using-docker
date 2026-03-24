@@ -17,7 +17,7 @@ Le prototype ci-dessous **implémente une partie** de ce périmètre : dossiers 
 
 ---
 
-## 2. Besoins métier (résumé — à développer dans la diapo « Business »)
+## 2. Besoins métier
 
 | Besoin métier | Ce que le prototype illustre |
 |---------------|------------------------------|
@@ -30,7 +30,7 @@ Le prototype ci-dessous **implémente une partie** de ce périmètre : dossiers 
 
 ---
 
-## 3. Besoins techniques (résumé — à développer dans la diapo « Technical »)
+## 3. Besoins techniques
 
 | Besoin technique | Réalisation dans le dépôt |
 |------------------|---------------------------|
@@ -92,7 +92,7 @@ flowchart LR
 
 ---
 
-## 5. Analyse des risques (aperçu — version complète en diapo « Sécurité »)
+## 5. Analyse des risques 
 
 | Risque | Illustration dans ce labo | Piste de mitigation (cible production) |
 |--------|---------------------------|----------------------------------------|
@@ -106,7 +106,7 @@ Ce prototype est **volontairement minimal** sur la sécurité : il sert à démo
 
 ---
 
-## 6. Principes cloud-native mis en avant (pour la grille d’évaluation)
+## 6. Principes cloud-native mis en avant 
 
 - **Microservices logiques** : API, persistance, analyse batch légère, visualisation, génération de charge découplées.  
 - **Infrastructure as code** : tout est décrit dans `docker-compose.yaml` + fichiers de provisioning Grafana.  
@@ -205,11 +205,8 @@ chmod +x test.sh
 ./test.sh
 ```
 
-Sous **PowerShell**, réutiliser les mêmes commandes `docker compose` que dans `test.sh`.
 
----
-
-## 12. Limites connues du prototype (à citer en soutenance écrite / PDF)
+## 12. Limites connues du prototype
 
 - Pas de gestion des **RDV** ni des **urgences** métier au-delà des alertes vitales simulées.  
 - **Sécurité** faible : convenable uniquement en local / salle de TP.  
@@ -232,7 +229,7 @@ Sous **PowerShell**, réutiliser les mêmes commandes `docker compose` que dans 
 
 ---
 
-## 14. Livrables attendus par le cours (checklist)
+## 14. Livrables attendus par le cours
 
 | Livrable | Où le trouver |
 |----------|----------------|
@@ -242,4 +239,4 @@ Sous **PowerShell**, réutiliser les mêmes commandes `docker compose` que dans 
 | Vérification scaling | Section 9 |
 | Distinction besoins métier / techniques | Sections 2 et 3 (+ détail dans le PDF) |
 
-*MediComTel — prototype pédagogique. Non destiné à un usage clinique réel.*
+*MediComTel — prototype pédagogique.*
