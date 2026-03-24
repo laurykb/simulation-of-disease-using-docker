@@ -79,9 +79,26 @@
     },
 
     {
+      "type": "timeseries",
+      "title": "SpO2 (patient sélectionné)",
+      "gridPos": { "x": 0, "y": 16, "w": 24, "h": 8 },
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "pg_main" },
+      "fieldConfig": { "defaults": { "min": 80, "max": 100, "unit": "percent" }, "overrides": [] },
+      "options": { "legend": { "showLegend": true } },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  EXTRACT(EPOCH FROM t.ts) * 1000 AS \"time\",\n  t.spo2 AS \"value\",\n  p.nom AS \"metric\"\nFROM telemetrie t\nJOIN patients p ON p.id = t.patient_id\nWHERE ($patient_id = -1 OR p.id = $patient_id)\n  AND $__timeFilter(t.ts)\n  AND t.spo2 IS NOT NULL\nORDER BY t.ts ASC;"
+        }
+      ]
+    },
+
+    {
       "type": "table",
       "title": "Patients (créés via CLI)",
-      "gridPos": { "x": 0, "y": 24, "w": 24, "h": 8 },
+      "gridPos": { "x": 0, "y": 32, "w": 24, "h": 8 },
       "datasource": { "type": "grafana-postgresql-datasource", "uid": "pg_main" },
       "options": { "showHeader": true },
       "targets": [
@@ -89,7 +106,7 @@
           "refId": "A",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT \n  id AS \"ID patient\",\n  nom AS \"Nom\",\n  prenom AS \"Prénom\",\n  dob AS \"Date de naissance\",\n  statut AS \"Statut\",\n  created_at AS \"Date de création\"\nFROM patients\nWHERE statut = 'cli'\nORDER BY created_at DESC;"
+          "rawSql": "SELECT \n  id AS \"ID patient\",\n  nom AS \"Nom\",\n  prenom AS \"Prénom\",\n  dob AS \"Date de naissance\",\n  statut AS \"Statut\",\n  type_patient AS \"Type\",\n  created_at AS \"Date de création\"\nFROM patients\nWHERE statut = 'cli'\nORDER BY created_at DESC;"
         }
       ]
     }

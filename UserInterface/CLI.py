@@ -30,7 +30,7 @@ def creer_patient():
 
 def main():
 
-    print("CLI version 2025-10-06 v3")
+    print(f"MediComTel CLI — API : {API_URL}")
     while True:
         print("\n=== MediComTel CLI ===")
         print("1) Créer un dossier patient")

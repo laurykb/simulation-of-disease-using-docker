@@ -1,41 +1,48 @@
 import os
+from datetime import date, datetime, timezone
+
 import psycopg2
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
-from datetime import datetime, date
 
-# -------- Connexion à la DB --------
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://admin:admin@db:5432/base_test")
+
 
 def get_conn():
     return psycopg2.connect(DATABASE_URL)
 
-# -------- App FastAPI --------
-app = FastAPI(title="MediComTel API (simple version)")
 
-# -------- Schémas d’entrée ----------
+app = FastAPI(title="MediComTel API", version="2.0.0")
+
+
+def _utcnow() -> datetime:
+    return datetime.now(timezone.utc)
+
+
 class PatientIn(BaseModel):
     nom: str
     prenom: str
     dob: date
-    statut: str | None = None
-    type_patient: str | None = "normal"
+    statut: str = "cli"
+    type_patient: str = "normal"
+
 
 class TelemetrieIn(BaseModel):
     patient_id: int
-    ts: datetime = Field(default_factory=datetime.utcnow)
+    ts: datetime = Field(default_factory=_utcnow)
     hr: int | None = None
     spo2: int | None = None
     temp: float | None = None
+
 
 class AlerteIn(BaseModel):
     patient_id: int
     type: str
     severity: str
     message: str
-    ts: datetime = Field(default_factory=datetime.utcnow)
+    ts: datetime = Field(default_factory=_utcnow)
 
-# -------- Endpoints ----------
+
 @app.post("/patient")
 def create_patient(payload: PatientIn):
     sql = """
@@ -45,10 +52,20 @@ def create_patient(payload: PatientIn):
     """
     with get_conn() as conn:
         with conn.cursor() as cur:
-            cur.execute(sql, (payload.nom, payload.prenom, payload.dob, payload.statut, payload.type_patient))
+            cur.execute(
+                sql,
+                (
+                    payload.nom,
+                    payload.prenom,
+                    payload.dob,
+                    payload.statut,
+                    payload.type_patient,
+                ),
+            )
             new_id = cur.fetchone()[0]
             conn.commit()
     return {"id": new_id, "status": "created"}
+
 
 @app.post("/telemetrie")
 def add_telemetry(payload: TelemetrieIn):
@@ -59,11 +76,21 @@ def add_telemetry(payload: TelemetrieIn):
                 raise HTTPException(400, "Unknown patient_id")
 
             cur.execute(
-                "INSERT INTO telemetrie (patient_id, ts, hr, temp) VALUES (%s, %s, %s, %s)",
-                (payload.patient_id, payload.ts, payload.hr, payload.temp)
+                """
+                INSERT INTO telemetrie (patient_id, ts, hr, spo2, temp)
+                VALUES (%s, %s, %s, %s, %s)
+                """,
+                (
+                    payload.patient_id,
+                    payload.ts,
+                    payload.hr,
+                    payload.spo2,
+                    payload.temp,
+                ),
             )
             conn.commit()
     return {"status": "ok"}
+
 
 @app.post("/alertes")
 def add_alert(payload: AlerteIn):
@@ -74,11 +101,21 @@ def add_alert(payload: AlerteIn):
                 raise HTTPException(400, "Unknown patient_id")
 
             cur.execute(
-                "INSERT INTO alertes (patient_id, ts, type, severity, message) VALUES (%s, %s, %s, %s, %s)",
-                (payload.patient_id, payload.ts, payload.type, payload.severity, payload.message)
+                """
+                INSERT INTO alertes (patient_id, ts, type, severity, message)
+                VALUES (%s, %s, %s, %s, %s)
+                """,
+                (
+                    payload.patient_id,
+                    payload.ts,
+                    payload.type,
+                    payload.severity,
+                    payload.message,
+                ),
             )
             conn.commit()
     return {"status": "ok"}
+
 
 @app.get("/health")
 def health():
@@ -90,15 +127,31 @@ def health():
     except Exception as e:
         return {"status": "down", "error": str(e)}
 
-#on liste les patients présents dans la base
+
 @app.get("/patients")
 def list_patients():
     with get_conn() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT id, nom, prenom, statut, type_patient FROM patients;")
+            cur.execute(
+                """
+                SELECT id, nom, prenom, dob, statut, type_patient, created_at
+                FROM patients
+                ORDER BY id
+                """
+            )
             rows = cur.fetchall()
-            patients = [
-                {"id": r[0], "nom": r[1], "prenom": r[2], "statut": r[3], "type_patient": r[4]}
-                for r in rows
-            ]
+            patients = []
+            for r in rows:
+                created = r[6]
+                patients.append(
+                    {
+                        "id": r[0],
+                        "nom": r[1],
+                        "prenom": r[2],
+                        "dob": str(r[3]) if r[3] is not None else None,
+                        "statut": r[4],
+                        "type_patient": r[5],
+                        "created_at": created.isoformat() if created else None,
+                    }
+                )
     return patients

@@ -71,12 +71,17 @@ def send_data():
     while True:
         t = time.time() - t0
         for p in patients:
-            patient_type = p.get("type_patient", "normal")  # <-- récupère le type
+            patient_type = p.get("type_patient", "normal")
             hr = generate_hr(patient_type, t)
+            if patient_type == "unstable" and random.random() < 0.25:
+                spo2 = random.randint(86, 91)
+            else:
+                spo2 = random.randint(96, 100)
             data = {
                 "patient_id": p["id"],
                 "hr": hr,
-                "temp": round(random.uniform(36.0, 38.5), 1)
+                "spo2": spo2,
+                "temp": round(random.uniform(36.0, 38.5), 1),
             }
             try:
                 r = requests.post(API_TELEMETRIE, json=data, timeout=5)

@@ -1,11 +1,13 @@
+# MediComTel — stack télémétrie (Postgres + FastAPI + workers + Grafana + Nginx)
+# Variables : copier .env.example vers .env (optionnel, les valeurs par défaut suffisent en local)
+
 services:
   db:
     image: postgres:14
-    #container_name: medicomtel_db
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: base_test
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
+      POSTGRES_DB: ${POSTGRES_DB:-base_test}
     profiles: ["core"]
     volumes:
       - db_data:/var/lib/postgresql/data
@@ -13,7 +15,7 @@ services:
     networks:
       - backend
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -h localhost"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin} -h localhost"]
       interval: 3s
       timeout: 2s
       retries: 20
@@ -31,13 +33,15 @@ services:
     environment:
     - API_BASE=http://api:8000    # ⬅️ remplace API_URL
 
-  api:  
-    build: ./api
+  api:
+    build: ./API
     #container_name: medicomtel_apiv1 (on gère le nom dynamiquement)
     profiles: ["core"]
     depends_on:
       db:
         condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-admin}@db:5432/${POSTGRES_DB:-base_test}
     networks:
       - backend
       - frontend
@@ -47,12 +51,12 @@ services:
       timeout: 2s
       retries: 40
     
-  grafana: 
+  grafana:
     image: grafana/grafana:latest
     container_name: medicomtel_dashboard
     environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
     depends_on:
       - db
     ports:
@@ -76,9 +80,14 @@ services:
           condition: service_started
     networks:
       - backend
-    profiles: ["workers"]     
+    profiles: ["workers"]
     environment:
       - API_URL=http://api:8000/alertes
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=${POSTGRES_DB:-base_test}
+      - DB_USER=${POSTGRES_USER:-admin}
+      - DB_PASS=${POSTGRES_PASSWORD:-admin}
       - LOOKBACK_SECONDS=15
       - SLEEP_SECONDS=2
 

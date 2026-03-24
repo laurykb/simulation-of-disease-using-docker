@@ -59,7 +59,7 @@ def fetch_recent_rows():
     """Récupère les mesures récentes (évite TOP 10 statique)."""
     since = datetime.now(timezone.utc) - timedelta(seconds=LOOKBACK_SECONDS)
     sql = """
-        SELECT id, patient_id, ts, hr, temp
+        SELECT id, patient_id, ts, hr, spo2, temp
         FROM telemetrie
         WHERE ts > %s
         ORDER BY ts ASC
@@ -90,7 +90,8 @@ def process_rows(rows):
     for row in rows:
         pid = int(row["patient_id"])
         ts  = row["ts"] if isinstance(row["ts"], datetime) else datetime.fromisoformat(row["ts"])
-        hr  = row["hr"]
+        hr = row["hr"]
+        spo2 = row["spo2"]
 
         # dédup : ne traite pas un ts déjà vu pour ce patient
         last_ts = last_ts_by_patient.get(pid)
@@ -98,15 +99,18 @@ def process_rows(rows):
             continue
         last_ts_by_patient[pid] = ts
 
-        if hr is None:
-            continue
+        if hr is not None:
+            if hr > 180:
+                send_alert(pid, "tachycardie", "high", f"HR={hr} bpm détecté", ts)
+                count += 1
+            elif hr < 50:
+                send_alert(pid, "bradycardie", "high", f"HR={hr} bpm détecté", ts)
+                count += 1
 
-        if hr > 180:
-            send_alert(pid, "tachycardie", "high", f"HR={hr} bpm détecté", ts)
+        if spo2 is not None and spo2 < 92:
+            send_alert(pid, "hypoxemie", "high", f"SpO2={spo2}% (seuil 92%)", ts)
             count += 1
-        elif hr < 50:
-            send_alert(pid, "bradycardie", "high", f"HR={hr} bpm détecté", ts)
-            count += 1
+
     return count
 
 def main_loop():

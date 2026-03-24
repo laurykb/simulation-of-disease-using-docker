@@ -1,20 +1,22 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
-echo " Démarrage DB + API…"
-# On scale l'API : on lance 3 conteneurs issus de la même image
-docker compose -p medicomtel --profile core up -d --scale api=3 db api
+PROJECT="${COMPOSE_PROJECT_NAME:-medicomtel}"
+export COMPOSE_PROJECT_NAME="$PROJECT"
 
-#on démarre nginx
+echo "→ Démarrage DB + API (scale api=3)…"
+docker compose --profile core up -d --build --scale api=3 db api
+
+echo "→ Nginx (reverse proxy)…"
 docker compose --profile core --profile lb up -d nginx
 
-echo "Lance le CLI (remplis /patient), Ctrl+D pour quitter"
-docker compose --profile cli up -d --build
-docker compose --profile core --profile cli run --rm cli
+echo "→ CLI interactif (créer un patient statut=cli), Ctrl+D pour terminer la session"
+docker compose --profile core --profile cli run --rm --build cli
 
-echo "▶️  Démarrage des workers + Grafana…"
+echo "→ Workers + Grafana…"
 docker compose --profile core --profile workers --profile viz up -d --build analyzer simulator grafana
 
-echo "Tout est lancé !"
-echo "Grafana : http://localhost:8082"
-echo "API (via Nginx LB) : http://localhost:8081"
+echo ""
+echo "Terminé."
+echo "  Grafana (admin / voir GRAFANA_ADMIN_PASSWORD) : http://localhost:8082"
+echo "  API via Nginx : http://localhost:8081"
