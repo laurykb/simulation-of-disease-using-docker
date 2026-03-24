@@ -227,16 +227,5 @@ chmod +x test.sh
 | `docker-compose.yaml` | Topologie et variables |
 | `nginx.conf` | Répartition de charge vers `api` |
 
----
-
-## 14. Livrables attendus par le cours
-
-| Livrable | Où le trouver |
-|----------|----------------|
-| Présentation PDF 5 slides (groupe, business, technique, architecture, risques) | Hors dépôt — à produire séparément |
-| Mini-prototype Docker Compose fonctionnel | Ce dépôt |
-| README avec instructions | Ce fichier |
-| Vérification scaling | Section 9 |
-| Distinction besoins métier / techniques | Sections 2 et 3 (+ détail dans le PDF) |
 
 *MediComTel — prototype pédagogique.*
