@@ -3,8 +3,6 @@
 **Contexte pédagogique** — Ce dépôt correspond au **mini-prototype** du système **MediComTel** : gestion de dossiers patients et **télémétrie** (rythme cardiaque, SpO₂, température) avec **alertes en temps quasi réel** et **tableau de bord** pour le suivi.  
 L’**analyse détaillée** (besoins métier / techniques, architecture annotée, modèle de menaces complet) doit figurer dans la **présentation PDF** (5 diapositives selon le canevas fourni en cours) ; ce README sert de **guide d’exécution**, de **validation fonctionnelle** et de **documentation des limites** pour l’évaluation.
 
-**Diapositive 0 (PDF)** — À compléter par le groupe : noms des participant·e·s, référence au cours et au sujet MediComTel.
-
 ---
 
 ## 1. Rappel des objectifs du système (cadrage)
