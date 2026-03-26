@@ -1,11 +1,10 @@
-# MediComTel — Projet e-Health (mini-prototype Docker)
+# MediComTel Projet e-Health (mini-prototype Docker)
 
 **Contexte pédagogique** — Ce dépôt correspond au **mini-prototype** du système **MediComTel** : gestion de dossiers patients et **télémétrie** (rythme cardiaque, SpO₂, température) avec **alertes en temps quasi réel** et **tableau de bord** pour le suivi.  
-L’**analyse détaillée** (besoins métier / techniques, architecture annotée, modèle de menaces complet) doit figurer dans la **présentation PDF** (5 diapositives selon le canevas fourni en cours) ; ce README sert de **guide d’exécution**, de **validation fonctionnelle** et de **documentation des limites** pour l’évaluation.
 
 ---
 
-## 1. Rappel des objectifs du système (cadrage)
+## 1. Rappel des objectifs du système 
 
 Un organisme de soins souhaite **surveiller à distance** des patients (ex. pilotes, athlètes) lors d’événements. Le système doit :
 
@@ -26,7 +25,7 @@ Le prototype ci-dessous **implémente une partie** de ce périmètre : dossiers 
 | Vue opérationnelle pour le soignant | **Grafana** : courbes HR / température / SpO₂, table des alertes, liste des patients « actifs » |
 | Gestion minimale des dossiers | API + **CLI** pour créer un patient (équivalent d’une saisie administrative légère) |
 
-**Non couvert** par ce prototype (à mentionner explicitement en présentation et ci-dessous) : authentification forte, chiffrement au repos, hébergement certifié HDS, intégration HL7/FHIR, gestion des RDV, applications mobiles patients, etc.
+**Non couvert** par ce prototype : authentification forte, chiffrement au repos, hébergement certifié HDS, intégration HL7/FHIR, gestion des RDV, applications mobiles patients, etc.
 
 ---
 
